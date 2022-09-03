@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clinic Main</title>
+</head>
+<body>
+<h2>Clinic Main Page</h2>
+<ul>
+{% for appoint in appointments %}
+    <li>Время: {{ appoint[0] }} Доктор: {{ appoint[1] }}</li>
+{% endfor %}
+</ul>
+</body>
+</html>

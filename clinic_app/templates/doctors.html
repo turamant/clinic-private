@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Доктора</title>
+</head>
+<body>
+<h2>Доктора клиники</h2>
+{% for doctor in doctors %}
+<p>{{ doctor.family }}</p>
+{% endfor %}
+</body>
+</html>

@@ -10,23 +10,24 @@ class BaseConfig:
     # flask-security #
     SECURITY_PASSWORD_SALT = 'salt'
     SECURITY_PASSWORD_HASH = 'pbkdf2_sha256'
-    STORAGE = '/home/tornado/PycharmProjects/pythonProject/myBlog/app/static/images'
+    STORAGE = '/home/tornado/PycharmProjects/pythonProject/myBlog/clinic_app/static/images'
     ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 class DevelopementConfig(BaseConfig):
     DEBUG = True
+    # pip install mysql-connector
     SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI') or \
-                              'mysql+mysqlconnector://bloger:a_L908zx_q@localhost/myblog'
+                              'mysql+mysqlconnector://bloger:a_L908zx_q@localhost/clinicDB'
 
 
 class TestingConfig(BaseConfig):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI') or \
-                              'mysql+mysqlconnector://bloger:a_L908zx_q@localhost/myblog'
+                              'mysql+mysqlconnector://bloger:a_L908zx_q@localhost/clinicDB'
 
 
 class ProductionConfig(BaseConfig):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI') or \
-                              'mysql+mysqlconnector://bloger:a_L908zx_q@localhost/myblog'
+                              'mysql+mysqlconnector://bloger:a_L908zx_q@localhost/clinicDB'
