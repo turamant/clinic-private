@@ -7,11 +7,8 @@ base_path = os.path.abspath(os.path.dirname(__file__))
 class BaseConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'a#966really@!defew`232e9875654jklkjj#%key'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # flask-security #
-    SECURITY_PASSWORD_SALT = 'salt'
-    SECURITY_PASSWORD_HASH = 'pbkdf2_sha256'
-    STORAGE = '/home/tornado/PycharmProjects/pythonProject/myBlog/clinic_app/static/images'
-    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
+
 
 
 class DevelopementConfig(BaseConfig):
