@@ -1,11 +1,16 @@
 import os
+from dotenv import load_dotenv
 
 app_dir = os.path.abspath(os.path.dirname(__file__))
 base_path = os.path.abspath(os.path.dirname(__file__))
 
 
 class BaseConfig:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'a#966really@!defew`232e9875654jklkjj#%key'
+    dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+    if os.path.exists(dotenv_path):
+        load_dotenv(dotenv_path)
+
+    SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
@@ -14,9 +19,7 @@ class BaseConfig:
 class DevelopementConfig(BaseConfig):
     DEBUG = True
     # pip install mysql-connector
-    SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI') or \
-                              'mysql+mysqlconnector://bloger:a_L908zx_q@localhost/clinicDB'
-
+    SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI')
 
 class TestingConfig(BaseConfig):
     DEBUG = True
