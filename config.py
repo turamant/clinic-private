@@ -14,8 +14,6 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-
-
 class DevelopementConfig(BaseConfig):
     DEBUG = True
     # pip install mysql-connector
@@ -23,11 +21,9 @@ class DevelopementConfig(BaseConfig):
 
 class TestingConfig(BaseConfig):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI') or \
-                              'mysql+mysqlconnector://bloger:a_L908zx_q@localhost/clinicDB'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI')
 
 
 class ProductionConfig(BaseConfig):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI') or \
-                              'mysql+mysqlconnector://bloger:a_L908zx_q@localhost/clinicDB'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('PRODUCTION_DATABASE_URI') or

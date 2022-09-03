@@ -1,2 +1,5 @@
 password.txt
 .idea
+.env
+__pycache__
+.idea/inspectionProfiles
