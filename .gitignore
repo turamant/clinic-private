@@ -3,3 +3,4 @@ password.txt
 .env
 __pycache__
 .idea/inspectionProfiles
+migrations
