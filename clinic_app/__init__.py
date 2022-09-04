@@ -70,7 +70,7 @@ class Appointment(db.Model):
     data_appointment = db.Column(db.DateTime, unique=True)
 
     def __repr__(self):
-        return f'<MedicalSpeciality: {self.data_appointment}>'
+        return f'Дата приема: {self.data_appointment}'
 
     def __str__(self):
         return f'{self.data_appointment}'
