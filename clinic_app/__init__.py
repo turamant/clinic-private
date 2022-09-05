@@ -1,3 +1,6 @@
+from flask_login import UserMixin, LoginManager
+
+from .auth import auth
 from flask import Flask
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -11,6 +14,16 @@ app.config.from_object(DevelopementConfig)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+login_manager = LoginManager()
+login_manager.session_protection = 'strong'
+login_manager.login_view = 'auth.login'
+
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 #######3   Models ###########
 
@@ -108,9 +121,27 @@ class City(db.Model):
         return f'{self.name}'
 
 
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True)
+    description = db.Column(db.String(255))
+
+
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True, index=True)
+    username = db.Column(db.String(100), unique=True, index=True)
+    password_hash = db.Column(db.String(255))
+    image = db.Column(db.String(20), nullable=True, default='default.jpg')
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+
+
 ########## End Models #######
 
 
+app.register_blueprint(auth, url_prefix='/auth')
 
 ### Admin panel ###
 admin = Admin(app, 'Clinic', url='/admin')
@@ -121,6 +152,6 @@ admin.add_view(ModelView(Doctor, db.session))
 admin.add_view(ModelView(Appointment, db.session))
 admin.add_view(ModelView(Address, db.session))
 admin.add_view(ModelView(City, db.session))
+admin.add_view(ModelView(User, db.session))
 
-
-from clinic_app import routers
+from clinic_app import routers, auth

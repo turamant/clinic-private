@@ -1,4 +1,5 @@
-from flask import render_template
+from flask import render_template, url_for
+from flask_login import login_required, current_user
 
 from clinic_app import app, Appointment, Doctor, db, Patient, Specialty
 
@@ -28,7 +29,13 @@ def index():
     return render_template('index.html', records=records, specialty=specialty)
 
 
-@app.route('/appoints')
+@app.route('/profile/')
+@login_required
+def profile():
+    image_file = url_for('static', filename='images/' + current_user.image)
+    return render_template('profile.html', username=current_user.username, image_file=image_file)
+
+@app.route('/appoints/')
 def index_appoints():
     specialty = db.session.query(Doctor.family, Specialty.title).join(Specialty).filter(
         Doctor.specialty_id == Specialty.id).all()
@@ -52,7 +59,13 @@ def index_appoints():
     return render_template('index_appoints.html', records=records)
 
 
-@app.route('/doctors')
+@app.route('/doctors/')
 def index_doctors():
     doctors = db.session.query(Doctor).all()
     return render_template('doctors.html', doctors=doctors)
+
+
+@app.route('/secret/')
+def secret_test():
+    return 'Only authenticated users are allowed'
+
