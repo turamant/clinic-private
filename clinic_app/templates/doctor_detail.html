@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+
+{{ super() }}
+
+{% block content %}
+<div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
+        <div class="text-slate-700 leading-snug">
+                <div class="information w-full py-6 px-6 lg:p-6">
+                    <h1 class="font-bold text-2xl">{{ doctor.family }}</h1>
+                            <p class="font-bold text-xl">{{ doctor.name }}</p>
+                            <p class="font-bold text-xl">{{ doctor.patronymic }}</p>
+                            <p class="text-xl">Кабинет: {{ doctor.cabinet_id }},
+                            <p class="text-xl">Специальность.:{{ doctor.specialty_id }},
+                            <p class="text-xl">Тариф: {{ doctor.admission_cost }}
+                            <p class="text-xl">Процент отчисления: {{ doctor.deduction_percentage }}
+             </div>
+        </div>
+
+    <br>
+    <hr>
+    <h1 class="font-bold text-2xl">Все приемы:</h1>
+    <div class="information w-full py-6 px-6 lg:p-6">
+    {% for appointment in appointments %}
+        <li>{{ appointment }}&#x20bd;</li>
+    {% endfor %}
+    </div>
+
+    <br>
+    <hr>
+    <h1 class="font-bold text-2xl">Все отзывы:</h1>
+    <div class="information w-full py-6 px-6 lg:p-6">
+    {% for comm in comments %}
+        <li>{{ comm }}</li>
+
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}

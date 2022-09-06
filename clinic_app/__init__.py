@@ -1,4 +1,7 @@
+import datetime
+
 from flask_login import UserMixin, LoginManager
+from sqlalchemy.ext.orderinglist import ordering_list
 
 from .auth import auth
 from flask import Flask
@@ -27,11 +30,12 @@ def load_user(user_id):
 
 #######3   Models ###########
 
+
 class Specialty(db.Model):
     __tablename__ = 'specialties'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256), unique=True)
-    doctors = db.relationship('Doctor', backref='specialties', lazy='dynamic')
+    doctors = db.relationship('Doctor', backref='specialty', lazy='dynamic')
 
     def __repr__(self):
         return f'<Speciality: {self.title}>'
@@ -40,14 +44,52 @@ class Specialty(db.Model):
         return f'{self.title}'
 
 
+class Clinic(db.Model):
+    __tablename__ = 'clinics'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(256))
+    address_id = db.Column(db.Integer, db.ForeignKey('addresses.id'))
+    phone = db.Column(db.String(12), unique=True)
+    cabinets = db.relationship('Cabinet', backref='clinic', lazy='dynamic')
+
+    def __repr__(self):
+        return f'<Patient: {self.title}>'
+
+    def __str__(self):
+        return f'{self.title}'
+
+
+class Cabinet(db.Model):
+    __tablename__ = 'cabinets'
+    id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.Integer)
+    clinic_id = db.Column(db.Integer, db.ForeignKey('clinics.id'))
+    doctor = db.relationship('Doctor', backref='cabinet', uselist=False)
+
+    def __repr__(self):
+        return f'{self.number}'
+
+    def __str__(self):
+        return f'{self.number}'
+
+
 class Patient(db.Model):
     __tablename__ = 'patients'
     id = db.Column(db.Integer, primary_key=True)
     family = db.Column(db.String(256))
     name = db.Column(db.String(256))
     patronymic = db.Column(db.String(256))
-    date_of_birth = db.Column(db.DateTime)
+    date_of_birth = db.Column(db.Date)
     address_id = db.Column(db.Integer, db.ForeignKey('addresses.id'))
+    phone = db.Column(db.String(12), unique=True)
+
+    @property
+    def get_age(self):
+        now = datetime.datetime.now()
+        now_b = datetime.date(year=now.year, month=now.month, day=now.day)
+        age = (int((now_b - self.date_of_birth).days / (365.2425)))
+        print(age)
+        return age
 
     def __repr__(self):
         return f'<Patient: {self.family}>'
@@ -62,9 +104,11 @@ class Doctor(db.Model):
     family = db.Column(db.String(256))
     name = db.Column(db.String(256))
     patronymic = db.Column(db.String(256))
+    cabinet_id = db.Column(db.Integer, db.ForeignKey('cabinets.id'))
     specialty_id = db.Column(db.Integer, db.ForeignKey('specialties.id'))
     admission_cost = db.Column(db.Numeric(10, 2))
     deduction_percentage = db.Column(db.Numeric(10, 2))
+
 
     def __repr__(self):
         return f'<Doctor: {self.family}>'
@@ -74,19 +118,39 @@ class Doctor(db.Model):
 
 
 class Appointment(db.Model):
-    __tablename__ = 'doctors_patients'
+    __tablename__ = 'appointments'
     id = db.Column(db.Integer, primary_key=True)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'))
     patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'))
     doctor = db.relationship(Doctor, backref="appointment")
     patient = db.relationship(Patient, backref="appointment")
-    data_appointment = db.Column(db.DateTime, unique=True)
+    data = db.Column(db.Date)
+    time = db.Column(db.Time)
+    #comment = db.relationship('Comment', backref='appointment2', lazy='dynamic')
 
     def __repr__(self):
-        return f'Дата приема: {self.data_appointment}'
+        return f'Дата {self.data} и время {self.time} приема: '
 
     def __str__(self):
-        return f'{self.data_appointment}'
+        return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor}'
+
+
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'))
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(100))
+    body = db.Column(db.String(1024))
+    created = db.Column(db.DateTime)
+    active = db.Column(db.Boolean, default=True)
+    appointments = db.relationship(Appointment, backref='comment')
+
+    def __repr__(self):
+        return f'Автор {self.name}: {self.body},{self.created}'
+
+    def __str__(self):
+        return f'Автор {self.name}: {self.body},{self.created}'
 
 
 class Address(db.Model):
@@ -99,10 +163,10 @@ class Address(db.Model):
     patients = db.relationship('Patient', backref='address', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Addres: {self.street}>'
+        return f'<Addres: {self.street}, {self.house_number}, {self.apartment_number}>'
 
     def __str__(self):
-        return f'{self.street}'
+        return f'ул._{self.street}, дом №_{self.house_number}, кв.№_{self.apartment_number}'
 
 
 class City(db.Model):
@@ -152,6 +216,11 @@ admin.add_view(ModelView(Doctor, db.session))
 admin.add_view(ModelView(Appointment, db.session))
 admin.add_view(ModelView(Address, db.session))
 admin.add_view(ModelView(City, db.session))
+admin.add_view(ModelView(Clinic, db.session))
+admin.add_view(ModelView(Cabinet, db.session))
+admin.add_view(ModelView(Comment, db.session))
 admin.add_view(ModelView(User, db.session))
+admin.add_view(ModelView(Role, db.session))
+
 
 from clinic_app import routers, auth

@@ -1,13 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Доктора</title>
-</head>
-<body>
-<h2>Доктора клиники</h2>
-{% for doctor in doctors %}
-<p>{{ doctor.family }}</p>
-{% endfor %}
-</body>
-</html>
+{% extends 'base.html' %}
+
+
+{{ super() }}
+
+{% block content %}
+<div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
+        <div class="text-slate-700 leading-snug">
+            <h2 class="font-bold">Доктора клиники</h2>
+                {% for doctor in doctors %}
+                <p><a href="{{ url_for('get_doctors', title=doctor[2])}}" class="text-purple-800">{{ doctor[1] }},
+                {{ doctor[2] }}</a></p>
+                {% endfor %}
+        </div>
+</div>
+{% endblock %}

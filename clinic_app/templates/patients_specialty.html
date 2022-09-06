@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+
+{{ super() }}
+
+{% block content %}
+<div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
+        <div class="text-slate-700 leading-snug">
+            <h2 class="font-bold">Все пациенты посетившие доктора - {{ title }}а</h2>
+                {% for patient in patients %}
+                <p><a href="{{ url_for('patient_detail', family=patient[0])}}" class="text-purple-800">Пациент: {{ patient[0] }}</a>
+                <a href="{{ url_for('doctor_detail', family=patient[1])}}" class="text-purple-800">Врач: {{ patient[1] }}</a>
+                <a href="#" class="text-purple-800">Специалист: {{ patient[2] }}</a>
+                    Дата: {{ patient[3]}} Время: {{ patient[4]}}</p>
+                {% endfor %}
+        </div>
+</div>
+{% endblock %}
