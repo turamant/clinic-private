@@ -10,7 +10,7 @@ def index():
 
     query = db.session.query(Appointment).join(Doctor)\
         .filter(Appointment.doctor_id == Doctor.id)\
-        .order_by(Doctor.family, Appointment.data)
+        .order_by(Appointment.data, Doctor.family)
 
     records = query.all()
 

@@ -132,7 +132,10 @@ class Appointment(db.Model):
         return f'Дата {self.data} и время {self.time} приема: '
 
     def __str__(self):
-        return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor}'
+        if self.patient != None:
+            return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor}, Пациент: {self.patient}'
+        return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor} Пациент: __________'
+
 
 
 class Comment(db.Model):
