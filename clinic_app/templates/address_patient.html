@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+
+{{ super() }}
+
+{% block content %}
+<div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
+        <div class="text-slate-700 leading-snug">
+            <h2 class="font-bold">Все пациенты по адресу</h2>
+                {% for patient in address %}
+                <p class="text-purple-800">
+                    {{ patient[0] }} - {{ patient[1] }}</p>
+                {% endfor %}
+        </div>
+</div>
+{% endblock %}

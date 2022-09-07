@@ -1,95 +1,85 @@
 from flask import render_template, url_for
 from flask_login import login_required, current_user
+from sqlalchemy import func
 
-from clinic_app import app, Appointment, Doctor, db, Patient, Specialty, Comment
+from clinic_app import app, Appointment, Doctor, db, Patient, Specialty, Comment, Clinic, Address
 
 
 @app.route('/')
 def index():
-    specialty = db.session.query(Doctor.family, Specialty.title).join(Specialty).filter(Doctor.specialty_id == Specialty.id).all()
+    """Все приемы, все врачи
+    params:
+        specialty - специальность доктора
+        records - все приемы
+        client_count - количество пациентов по докторам
+    """
+    specialty = db.session.query(Specialty).all()
+    print(".--..spec", specialty)
 
-    query = db.session.query(Appointment).join(Doctor)\
+    records = db.session.query(Appointment)\
+        .join(Doctor)\
         .filter(Appointment.doctor_id == Doctor.id)\
-        .order_by(Appointment.data, Doctor.family)
+        .order_by(Appointment.data, Doctor.family)\
+        .all()
 
-    records = query.all()
+    client_count = db.session.query(Doctor, Specialty, func.count(Patient.id)).select_from(
+        Appointment) \
+        .join(Doctor).filter(Doctor.id == Appointment.doctor_id) \
+        .join(Specialty).filter(Doctor.specialty_id == Specialty.id) \
+        .join(Patient).filter(Patient.id == Appointment.patient_id) \
+        .group_by(Doctor.family).having(func.count(Patient.id)).all()
 
-    return render_template('index.html', records=records, specialty=specialty)
+    return render_template('index.html',
+                           records=records,
+                           specialty=specialty,
+                           client_count=client_count)
 
-
-@app.route('/profile/')
-@login_required
-def profile():
-    image_file = url_for('static', filename='images/' + current_user.image)
-    return render_template('profile.html', username=current_user.username, image_file=image_file)
-
-
-@app.route('/appoints/')
-def index_appoints():
-    specialty = db.session.query(Doctor.family, Specialty.title).join(Specialty).filter(
-        Doctor.specialty_id == Specialty.id).all()
-    for spec in specialty:
-        print("...speciality..= ", spec.family, spec.title)
-
-    query = db.session.query(Appointment.id, Appointment.data, Specialty.title, Doctor.family, Patient.family).select_from(Appointment)\
-        .join(Doctor) \
-        .filter(Appointment.doctor_id == Doctor.id)\
-        .join(Specialty)\
-        .filter(Doctor.specialty_id == Specialty.id)\
-        .outerjoin(Patient)\
-        .order_by(Doctor.family, Appointment.data)
-
-    records = query.all()
-    print(query)
-
-    for appointment in records:
-        print("....appointment=..", appointment)
-        print("....records=..", records)
-    return render_template('index_appoints.html', records=records, specialty=specialty)
 
 
 @app.route('/doctors/')
 def index_doctors():
-    doctors = db.session.query(Doctor.id, Doctor.family, Specialty.title).filter(Doctor.specialty_id==Specialty.id).all()
+    doctors = db.session.query(Doctor, Specialty)\
+        .filter(Doctor.specialty_id == Specialty.id)\
+        .all()
     print("...doctors..=", doctors)
     return render_template('doctors.html', doctors=doctors)
 
 
-@app.route('/doctors/<title>/')
-def get_doctors(title):
-    '''
-    select patients.family, doctors.family, specialties.title from patients
-    JOIN appointments ON appointments.patient_id=patients.id
-    JOIN doctors ON appointments.doctor_id=doctors.id
-    JOIN specialties ON doctors.specialty_id=specialties.id
-    where title='Окулист';
+@app.route('/patients/')
+def index_patients():
+    patients = db.session.query(Patient).all()
+    return render_template('patients.html', patients=patients)
 
-    '''
-    query = db.session.query(Patient, Doctor, Specialty, Appointment.data, Appointment.time)\
-        .select_from(Patient)\
-        .join(Appointment).filter(Appointment.patient_id == Patient.id)\
+
+@app.route('/doctors/<title>/')
+def doctors_spec(title):
+    print("..title..=", title)
+    query = db.session.query(Patient, Doctor, Specialty, Clinic, Appointment)\
+        .select_from(Appointment)\
+        .join(Patient).filter(Appointment.patient_id == Patient.id)\
         .join(Doctor).filter(Appointment.doctor_id == Doctor.id)\
+        .join(Clinic).filter(Doctor.clinica_id == Clinic.id)\
         .join(Specialty).filter(Doctor.specialty_id == Specialty.id)\
         .filter(Specialty.title == title)
     patients = query.all()
 
+    print("...QQQQpatients..=", patients)
     return render_template('patients_specialty.html', patients=patients, title=title)
 
 
-@app.route('/<family>/')
-def doctor_detail(family):
-    '''  records = db.session.query(Appointment, Doctor, Patient)\
-        .filter(Appointment.doctor_id == Doctor.id)\
-        .filter(Appointment.patient_id == Patient.id)\
-        .filter(Doctor.id == id).order_by(Appointment.data_appointment).all()
-    '''
-    print("...family=..", family)
-    doctor = db.session.query(Doctor).filter(Doctor.family == family).first()
-    appointments = doctor.appointment
 
-    print("...patient...=", doctor)
-    print("....appoint...=", appointments)
-    return render_template('doctor_detail.html', doctor=doctor, appointments=appointments)
+@app.route('/doctors/<int:id>/')
+def doctor_detail(id):
+    """Страница доктора"""
+    """appointments - все приемы"""
+    """comments - все комменты"""
+    doctor = db.session.query(Doctor).filter(Doctor.id == id).first()
+    appointments = doctor.appointment
+    comments = doctor.comments
+    return render_template('doctor_detail.html',
+                           doctor=doctor,
+                           appointments=appointments,
+                           comments=comments)
 
 
 @app.route('/secret/')
@@ -97,30 +87,18 @@ def secret_test():
     return 'Only authenticated users are allowed'
 
 
-
-@app.route('/patients/<family>/')
-def patient_detail(family):
-    '''
-    select doctors.family, doctors_patients.data_appointment from doctors_patients, doctors
-     where doctors.id = doctors_patients.doctor_id and doctors.id=2;
-
-     records = db.session.query(Appointment, Doctor, Patient)\
-        .filter(Appointment.doctor_id == Doctor.id)\
-        .filter(Appointment.patient_id == Patient.id)\
-        .filter(Doctor.id == id).order_by(Appointment.data_appointment).all()
-    '''
-    #doctor = db.session.query(Doctor).get_or_404(id)
-    print("family.......=", family)
-    patient = db.session.query(Patient).filter(Patient.family == family).first()
+@app.route('/patients/<int:id>/')
+def patient_detail(id):
+    """Страница пациента"""
+    """appointments - все приемы"""
+    """comments - все комменты"""
+    patient = db.session.query(Patient).filter(Patient.id == id).first()
     appointments = patient.appointment
-    comments = list()
-    for app in appointments:
-        comments.append(app.comment)
-
-    print("...patient...=", patient)
-    print("....appoint...=", appointments)
-    return render_template('patient_detail.html', patient=patient,
-                           appointments=appointments, comments=comments)
+    comments = patient.comments
+    return render_template('patient_detail.html',
+                           patient=patient,
+                           appointments=appointments,
+                           comments=comments)
 
 
 @app.errorhandler(404)
@@ -134,10 +112,70 @@ def internal_server_error(e):
 
 
 @app.route('/comments/')
-def get_comments():
-    appoint = db.session.query(Appointment).first()
-    comments = appoint.comment
+def get_all_comments():
+    """Все комменты в кучу"""
+    comments = db.session.query(Comment).all()
+    return f'Все комменты:{comments}'
 
-    print("+++ appoint++", appoint)
+
+@app.route('/comments/<int:id>/')
+def get_doctor_comments(id):
+    """Комменты по конкретному доктору (публично)"""
+    comments = db.session.query(Comment).filter(Comment.doctor_id == id).all()
+    if comments:
+        comment = comments[0]
+        doc = comment.doctor
+        print("doc....=", doc)
+    else:
+        doc = "PUSTO"
     print("...comments..", comments)
-    return f'comments{comments}'
+    return f'Доктор: {doc} комменарии для него: {comments}'
+
+
+@app.route('/count_patient/')
+def count_patient():
+    """
+    Подсчет пациентов по докторам(визитам)
+    """
+    client_count = db.session.query(Doctor.family, Doctor.name, Specialty.title, func.count(Patient.id)).select_from(Appointment) \
+        .join(Doctor).filter(Doctor.id == Appointment.doctor_id)\
+        .join(Specialty).filter(Doctor.specialty_id == Specialty.id)\
+        .join(Patient).filter(Patient.id == Appointment.patient_id)\
+        .group_by(Doctor.family).having(func.count(Patient.id)).all()
+
+    print(".......client_count....", client_count)
+    return render_template('count_patient.html')
+
+
+@app.route('/profile/')
+@login_required
+def profile():
+    image_file = url_for('static', filename='images/' + current_user.image)
+    return render_template('profile.html', username=current_user.username, image_file=image_file)
+
+
+@app.route('/clinics/')
+def clinics():
+    clinics = db.session.query(Clinic.title).all()
+    return f'клиники: {clinics}'
+
+
+@app.route('/clinics/<title>')
+def clinic_patient(title):
+    pass
+
+
+@app.route('/pati/<int:id>/')
+def address_patient(id):
+    '''
+    select addresses.street, patients.family from addresses, patients
+    where addresses.id = patients.address_id and addresses.id = 6;
+    '''
+    address = db.session.query(Address, Patient).\
+        filter(Address.id == Patient.address_id).\
+        filter(Address.id == id).all()
+    print("id....=", id)
+    print("address....=", address)
+    #return f'{address}'
+    return render_template('address_patient.html', address=address)
+

@@ -50,10 +50,11 @@ class Clinic(db.Model):
     title = db.Column(db.String(256))
     address_id = db.Column(db.Integer, db.ForeignKey('addresses.id'))
     phone = db.Column(db.String(12), unique=True)
+    doctor = db.relationship('Doctor', backref='clinic', lazy='dynamic')
     cabinets = db.relationship('Cabinet', backref='clinic', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Patient: {self.title}>'
+        return f'{self.title}'
 
     def __str__(self):
         return f'{self.title}'
@@ -64,7 +65,7 @@ class Cabinet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.Integer)
     clinic_id = db.Column(db.Integer, db.ForeignKey('clinics.id'))
-    doctor = db.relationship('Doctor', backref='cabinet', uselist=False)
+
 
     def __repr__(self):
         return f'{self.number}'
@@ -82,6 +83,7 @@ class Patient(db.Model):
     date_of_birth = db.Column(db.Date)
     address_id = db.Column(db.Integer, db.ForeignKey('addresses.id'))
     phone = db.Column(db.String(12), unique=True)
+    comments = db.relationship('Comment', backref='patient', lazy='dynamic')
 
     @property
     def get_age(self):
@@ -92,7 +94,7 @@ class Patient(db.Model):
         return age
 
     def __repr__(self):
-        return f'<Patient: {self.family}>'
+        return f'{self.family}'
 
     def __str__(self):
         return f'{self.family}'
@@ -104,14 +106,15 @@ class Doctor(db.Model):
     family = db.Column(db.String(256))
     name = db.Column(db.String(256))
     patronymic = db.Column(db.String(256))
-    cabinet_id = db.Column(db.Integer, db.ForeignKey('cabinets.id'))
+    clinica_id = db.Column(db.Integer, db.ForeignKey('clinics.id'))
     specialty_id = db.Column(db.Integer, db.ForeignKey('specialties.id'))
     admission_cost = db.Column(db.Numeric(10, 2))
     deduction_percentage = db.Column(db.Numeric(10, 2))
+    comments = db.relationship('Comment', backref='doctor', lazy='dynamic')
 
 
     def __repr__(self):
-        return f'<Doctor: {self.family}>'
+        return f'{self.family}'
 
     def __str__(self):
         return f'{self.family}'
@@ -126,7 +129,7 @@ class Appointment(db.Model):
     patient = db.relationship(Patient, backref="appointment")
     data = db.Column(db.Date)
     time = db.Column(db.Time)
-    #comment = db.relationship('Comment', backref='appointment2', lazy='dynamic')
+
 
     def __repr__(self):
         return f'Дата {self.data} и время {self.time} приема: '
@@ -137,17 +140,18 @@ class Appointment(db.Model):
         return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor} Пациент: __________'
 
 
-
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
-    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'))
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'))
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'))
     name = db.Column(db.String(100))
     email = db.Column(db.String(100))
     body = db.Column(db.String(1024))
     created = db.Column(db.DateTime)
     active = db.Column(db.Boolean, default=True)
-    appointments = db.relationship(Appointment, backref='comment')
+
+
 
     def __repr__(self):
         return f'Автор {self.name}: {self.body},{self.created}'

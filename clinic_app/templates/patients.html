@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+
+{{ super() }}
+
+{% block content %}
+<div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
+        <div class="text-slate-700 leading-snug">
+            <h2 class="font-bold">Все пациенты</h2>
+                {% for patient in patients %}
+                <p><a href="{{ url_for('patient_detail', id=patient.id)}}" class="text-purple-800">
+                    {{ patient.family }}</a></p>
+                {% endfor %}
+        </div>
+</div>
+{% endblock %}
