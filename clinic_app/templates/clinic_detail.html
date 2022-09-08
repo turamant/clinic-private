@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+
+{{ super() }}
+
+{% block content %}
+<div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
+        <div class="text-slate-700 leading-snug">
+                <div class="information w-full py-6 px-6 lg:p-6">
+                    <h1 class="font-bold text-2xl">{{ clinic.title }}</h1>
+                            <p class="font-bold text-xl">{{ clinic.city }}</p>
+                            <p class="text-xl">ул. {{ clinic.street }}, {{ clinic.house }}</p>
+                            <p class="text-xl">тел.:{{ clinic.phone }}
+                    <h2 class="font-bold text-xl">Наши доктора: </h2>
+                    <ul>
+                    {% for doctor in clinic.doctors %}
+                    <li class="text-xl"> {{ doctor.specialty }} : <a href="{{ url_for('doctor_detail', id=doctor.id)}}" class="text-purple-800"> {{ doctor.family }} {{ doctor.name }} {{ doctor.patronymic }} </a> </li>
+                    {% endfor %}
+                    </ul>
+                    <h3 class="font-bold text-xl">Наши кабинеты: </h3>
+                    {% for cabinet in clinic.cabinets %}
+                    {{ cabinet }},
+                    {% endfor %}
+
+             </div>
+        </div>
+
+    <br>
+    <hr>
+    <h1 class="font-bold text-2xl">Все приемы:</h1>
+    <div class="information w-full py-6 px-6 lg:p-6">
+    {% for appointment in appointments %}
+        <li>{{ appointment }}</li>
+    {% endfor %}
+    </div>
+
+    <br>
+    <hr>
+    <h1 class="font-bold text-2xl">Все отзывы написанные мной:</h1>
+    <div class="information w-full py-6 px-6 lg:p-6">
+    {% for comm in comments %}
+        <li>{{ comm }}</li>
+
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}

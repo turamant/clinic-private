@@ -48,9 +48,11 @@ class Clinic(db.Model):
     __tablename__ = 'clinics'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256))
-    address_id = db.Column(db.Integer, db.ForeignKey('addresses.id'))
+    city_id = db.Column(db.Integer, db.ForeignKey('cities.id'))
+    street_id = db.Column(db.Integer, db.ForeignKey('streets.id'))
+    house_id = db.Column(db.Integer, db.ForeignKey('houses.id'))
     phone = db.Column(db.String(12), unique=True)
-    doctor = db.relationship('Doctor', backref='clinic', lazy='dynamic')
+    doctors = db.relationship('Doctor', backref='clinic99', lazy='dynamic')
     cabinets = db.relationship('Cabinet', backref='clinic', lazy='dynamic')
 
     def __repr__(self):
@@ -65,6 +67,7 @@ class Cabinet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.Integer)
     clinic_id = db.Column(db.Integer, db.ForeignKey('clinics.id'))
+    doctor = db.relationship('Doctor', backref='cabinet', lazy='dynamic')
 
 
     def __repr__(self):
@@ -74,6 +77,65 @@ class Cabinet(db.Model):
         return f'{self.number}'
 
 
+class City(db.Model):
+    __tablename__ = 'cities'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256))
+    post_index = db.Column(db.String(6), unique=True)
+    latitude = db.Column(db.Numeric(11, 7))
+    longitude = db.Column(db.Numeric(11, 7))
+    patients = db.relationship('Patient', backref='city', lazy='dynamic')
+    clinics = db.relationship('Clinic', backref='city', lazy='dynamic')
+
+
+    def __repr__(self):
+        return f'<City: {self.name}>'
+
+    def __str__(self):
+        return f'{self.name}'
+
+
+class Street(db.Model):
+    __tablename__ = 'streets'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256), unique=True)
+    patients = db.relationship('Patient', backref='street', lazy='dynamic')
+    clinics = db.relationship('Clinic', backref='street', lazy='dynamic')
+
+    def __repr__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
+
+
+class House(db.Model):
+    __tablename__ = 'houses'
+    id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.String(6))
+    patients = db.relationship('Patient', backref='house', lazy='dynamic')
+    clinics = db.relationship('Clinic', backref='house', lazy='dynamic')
+
+    def __repr__(self):
+        return self.number
+
+    def __str__(self):
+        return self.number
+
+
+class Apartment(db.Model):
+    __tablename__ = 'apartments'
+    id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.String(6), unique=True)
+    patients = db.relationship('Patient', backref='apartment', lazy='dynamic')
+
+    def __repr__(self):
+        return self.number
+
+    def __str__(self):
+        return self.number
+
+
 class Patient(db.Model):
     __tablename__ = 'patients'
     id = db.Column(db.Integer, primary_key=True)
@@ -81,7 +143,10 @@ class Patient(db.Model):
     name = db.Column(db.String(256))
     patronymic = db.Column(db.String(256))
     date_of_birth = db.Column(db.Date)
-    address_id = db.Column(db.Integer, db.ForeignKey('addresses.id'))
+    city_id = db.Column(db.Integer, db.ForeignKey('cities.id'))
+    street_id = db.Column(db.Integer, db.ForeignKey('streets.id'))
+    house_id = db.Column(db.Integer, db.ForeignKey('houses.id'))
+    apartment_id = db.Column(db.Integer, db.ForeignKey('apartments.id'))
     phone = db.Column(db.String(12), unique=True)
     comments = db.relationship('Comment', backref='patient', lazy='dynamic')
 
@@ -107,11 +172,11 @@ class Doctor(db.Model):
     name = db.Column(db.String(256))
     patronymic = db.Column(db.String(256))
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinics.id'))
+    cabinet_id = db.Column(db.Integer, db.ForeignKey('cabinets.id'))
     specialty_id = db.Column(db.Integer, db.ForeignKey('specialties.id'))
     admission_cost = db.Column(db.Numeric(10, 2))
     deduction_percentage = db.Column(db.Numeric(10, 2))
     comments = db.relationship('Comment', backref='doctor', lazy='dynamic')
-
 
     def __repr__(self):
         return f'{self.family}'
@@ -160,38 +225,6 @@ class Comment(db.Model):
         return f'Автор {self.name}: {self.body},{self.created}'
 
 
-class Address(db.Model):
-    __tablename__ = 'addresses'
-    id = db.Column(db.Integer, primary_key=True)
-    city_id = db.Column(db.Integer, db.ForeignKey('cities.id'))
-    street = db.Column(db.String(256))
-    house_number = db.Column(db.Integer)
-    apartment_number = db.Column(db.Integer)
-    patients = db.relationship('Patient', backref='address', lazy='dynamic')
-
-    def __repr__(self):
-        return f'<Addres: {self.street}, {self.house_number}, {self.apartment_number}>'
-
-    def __str__(self):
-        return f'ул._{self.street}, дом №_{self.house_number}, кв.№_{self.apartment_number}'
-
-
-class City(db.Model):
-    __tablename__ = 'cities'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256))
-    post_index = db.Column(db.String(6), unique=True)
-    latitude = db.Column(db.Numeric(11, 7))
-    longitude = db.Column(db.Numeric(11, 7))
-    addresses = db.relationship('Address', backref='city', lazy='dynamic')
-
-    def __repr__(self):
-        return f'<City: {self.name}>'
-
-    def __str__(self):
-        return f'{self.name}'
-
-
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
@@ -221,11 +254,16 @@ admin.add_view(ModelView(Specialty, db.session))
 admin.add_view(ModelView(Patient, db.session))
 admin.add_view(ModelView(Doctor, db.session))
 admin.add_view(ModelView(Appointment, db.session))
-admin.add_view(ModelView(Address, db.session))
+
 admin.add_view(ModelView(City, db.session))
+admin.add_view(ModelView(Street, db.session))
+admin.add_view(ModelView(House, db.session))
+admin.add_view(ModelView(Apartment, db.session))
+
 admin.add_view(ModelView(Clinic, db.session))
 admin.add_view(ModelView(Cabinet, db.session))
 admin.add_view(ModelView(Comment, db.session))
+
 admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Role, db.session))
 

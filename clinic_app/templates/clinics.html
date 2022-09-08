@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+
+{{ super() }}
+
+{% block content %}
+<div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
+        <div class="text-slate-700 leading-snug">
+            <h2 class="font-bold">Все клиники</h2>
+                {% for clinic in clinics %}
+                <p><a href="{{ url_for('clinic_detail', id=clinic.id)}}" class="text-purple-800">
+                    {{ clinic.title }}</a></p>
+                {% endfor %}
+        </div>
+</div>
+<p><a href="{{ url_for('add_clinic')}}">Добавить новую клинику</a></p>
+{% endblock %}

@@ -7,14 +7,14 @@
 <div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
         <div class="text-slate-700 leading-snug">
                 <div class="information w-full py-6 px-6 lg:p-6">
-                    <h1 class="font-bold text-2xl">{{ patient.family }}</h1>
-                            <p class="font-bold text-xl">{{ patient.name }}</p>
-                            <p class="font-bold text-xl">{{ patient.patronymic }}</p>
-                            <p class="text-xl">дата рождения: {{ patient.date_of_birth }},
-                            <p class="text-xl">тел.:{{ patient.phone }},
-                            <p class="text-xl">город: {{ patient.city }},улица: {{ patient.street }},
-                                дом: {{ patient.house }}, квартира: {{ patient.apartment }}</p>
-                            <p class="text-xl">Полных лет: {{ patient.get_age }}
+                    <h1 class="font-bold text-2xl">доктору: {{ comment.doctor }}</h1>
+                            <p class="font-bold text-xl">от пациента: {{ comment.patient }}</p>
+                            <p class="text-xl"> {{ comment.name }}, {{ comment.email }}</p>
+                            <p class="text-xl">{{ comment.body }}</p>
+                    <p class="text-xl">{{ comment.created }}</p>
+                    <p class="text-xl">active: {{ comment.active }}</p>
+
+
              </div>
         </div>
 

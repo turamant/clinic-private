@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+
+{{ super() }}
+
+{% block content %}
+<div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
+        <div class="text-slate-700 leading-snug">
+            <h2 class="font-bold">Все комментарии</h2>
+                {% for comment in comments %}
+                <p><a href="{{ url_for('comment_detail', id=comment.id)}}" class="text-purple-800">
+                    {{ comment }}</a></p>
+                {% endfor %}
+        </div>
+</div>
+{% endblock %}

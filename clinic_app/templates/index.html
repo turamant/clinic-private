@@ -27,7 +27,7 @@
 </div>
 <div class="text-green-500">
     <ul class="mt-6 w-88 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-    {% for appoint in records %}
+    {% for appoint in appointments %}
         <li class="py-2 px-4 w-full border-b border-gray-200 dark:border-gray-600">
             <a href="#">
                 Код приема: {{ appoint.id }} | Дата: {{ appoint.data }}| Время: {{ appoint.time}} | Фамилия врача: {{ appoint.doctor }}  | {% if appoint.patient  %} Фамилия пациент: {{ appoint.patient }} {% else %} свободно {% endif %} | </a></li>
