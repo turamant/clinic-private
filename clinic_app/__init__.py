@@ -202,7 +202,7 @@ class Appointment(db.Model):
     def __str__(self):
         if self.patient != None:
             return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor}, Пациент: {self.patient}'
-        return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor} Пациент: __________'
+        return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor} Пациент:'
 
 
 class Comment(db.Model):

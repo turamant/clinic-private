@@ -6,12 +6,14 @@
 {% block content %}
 <div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
         <div class="text-slate-700 leading-snug">
-            <h2 class="font-bold">Все клиники</h2>
+            <h2 class="mb-6 font-bold">Все клиники</h2>
                 {% for clinic in clinics %}
-                <p><a href="{{ url_for('clinic_detail', id=clinic.id)}}" class="text-purple-800">
-                    {{ clinic.title }}</a></p>
+                <a href="{{ url_for('clinic_detail', id=clinic.id)}}" class="text-gray-900 bg-gradient-to-r from-lime-200 via-lime-400 to-lime-500 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-lime-300 dark:focus:ring-lime-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">
+                    {{ clinic.title }}</a>
                 {% endfor %}
         </div>
 </div>
-<p><a href="{{ url_for('add_clinic')}}">Добавить новую клинику</a></p>
+<button class="mt-6 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 text-gray-900 bg-blue-500 hover:bg-blue-700">
+    <a href="{{ url_for('add_clinic')}}">Добавить новую клинику</a>
+</button>
 {% endblock %}

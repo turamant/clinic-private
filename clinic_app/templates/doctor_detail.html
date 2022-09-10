@@ -17,19 +17,28 @@
                             <p class="text-xl">Процент отчисления: {{ doctor.deduction_percentage }}
              </div>
         </div>
+    <button class="text-gray-900 bg-gradient-to-r from-lime-200 via-lime-400 to-lime-500 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-lime-300 dark:focus:ring-lime-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">
+        <a href="{{ url_for('update_doctor', id=doctor.id )}}">Изменить данные доктора</a></button>
+    <button class="font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 text-gray-900 bg-red-500 hover:bg-red-700">
+        <a href="{{ url_for('del_doctor', id=doctor.id)}}">Удалить</a></button>
+    <h1 class="mt-6 font-bold text-2xl">Разместить новый прием:</h1>
+    <button class="font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 text-gray-900 bg-blue-500 hover:bg-blue-700">
+        <a href="{{ url_for('add_doctor_appointment', id=doctor.id)}}">Новый приём</a></button>
 
-    <br>
-    <hr>
-    <h1 class="font-bold text-2xl">Все приемы:</h1>
+    <h1 class="mt-6 font-bold text-2xl">Все приемы:</h1>
     <div class="information w-full py-6 px-6 lg:p-6">
     {% for appointment in appointments %}
-        <li>{{ appointment }}</li>
+        <li>{{ appointment }}
+            {% if not appointment.patient %}
+            <a href="{{ url_for('update_appointment', id=appointment.id )}}" class="font-medium rounded-lg text-sm px-5 text-center mr-2 mb-2 text-gray-900 bg-red-500 hover:bg-red-700">
+                     Записаться</a>
+            {% endif %}
+        </li>
     {% endfor %}
     </div>
 
-    <br>
-    <hr>
-    <h1 class="font-bold text-2xl">Все отзывы для меня:</h1>
+
+    <h1 class="mt-6 font-bold text-2xl">Все отзывы для меня:</h1>
     <div class="information w-full py-6 px-6 lg:p-6">
     {% for comm in comments %}
         <li>{{ comm }}</li>

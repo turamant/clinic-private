@@ -21,7 +21,7 @@
 {% for spec in specialty %}
     <a
         class="text-gray-900 bg-gradient-to-r from-lime-200 via-lime-400 to-lime-500 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-lime-300 dark:focus:ring-lime-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-        href="{{ url_for('doctors_spec', title=spec) }}"
+        href="{{ url_for('special_detail', id=spec.id) }}"
     > {{ spec }}</a>
 {% endfor %}
 </div>
@@ -29,8 +29,8 @@
     <ul class="mt-6 w-88 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
     {% for appoint in appointments %}
         <li class="py-2 px-4 w-full border-b border-gray-200 dark:border-gray-600">
-            <a href="#">
-                Код приема: {{ appoint.id }} | Дата: {{ appoint.data }}| Время: {{ appoint.time}} | Фамилия врача: {{ appoint.doctor }}  | {% if appoint.patient  %} Фамилия пациент: {{ appoint.patient }} {% else %} свободно {% endif %} | </a></li>
+            <a href="{{ url_for('doctor_detail', id=appoint.doctor_id)}}">
+                Код приема: {{ appoint.id }} | Дата: {{ appoint.data }}| Время: {{ appoint.time}} | Фамилия врача: {{ appoint.doctor }}| Специальность: {{ appoint.doctor.specialty_id }}  | {% if appoint.patient  %} Фамилия пациент: {{ appoint.patient }} {% else %} свободно {% endif %} | </a></li>
     {% endfor %}
     </ul>
 </div>

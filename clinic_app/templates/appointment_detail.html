@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+
+{{ super() }}
+
+{% block content %}
+<div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
+        <div class="text-slate-700 leading-snug">
+                <div class="information w-full py-6 px-6 lg:p-6">
+                    <h1 class="font-bold text-2xl">Доктор: {{ doctor.family }}</h1>
+                            <p class="font-bold text-xl">Пациент: {{ patient.family }}</p>
+                            <p class="font-bold text-xl">Дата: {{ appointment.data }}</p>
+                            <p class="text-xl">Время: {{ appointment.time }}
+                </div>
+        </div>
+    <button class="mt-6 py-4 px-6 rounded-xl text-white bg-blue-500 hover:bg-blue-700">
+        <a href="{{ url_for('update_appointment', id=appointment.id )}}">Изменить данные приема</a></button>
+    <button class="mt-6 py-4 px-6 rounded-xl text-white bg-red-500 hover:bg-red-700">
+        <a href="{{ url_for('del_appointment', id=appointment.id)}}">Удалить</a></button>
+
+
+
+</div>
+{% endblock %}
