@@ -1,11 +1,17 @@
 import datetime
+import os
+import random
+from datetime import datetime
+
 
 from flask_login import UserMixin, LoginManager
+
+from markupsafe import Markup
 from sqlalchemy.ext.orderinglist import ordering_list
 
 from .auth import auth
-from flask import Flask
-from flask_admin import Admin
+from flask import Flask, url_for
+from flask_admin import Admin, form
 from flask_admin.contrib.sqla import ModelView
 from flask_migrate import Migrate
 
@@ -174,15 +180,33 @@ class Doctor(db.Model):
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinics.id'))
     cabinet_id = db.Column(db.Integer, db.ForeignKey('cabinets.id'))
     specialty_id = db.Column(db.Integer, db.ForeignKey('specialties.id'))
+    #category = db.Column(db.String(256), nullable=True)
+    #stage = db.Column(db.Integer, nullable=True)
+    #specialization = db.Column(db.String(1000), nullable=True)
+    #education = db.Column(db.String(1000), nullable=True)
+    #work_experience = db.Column(db.String(1000), nullable=True)
     admission_cost = db.Column(db.Numeric(10, 2))
     deduction_percentage = db.Column(db.Numeric(10, 2))
     comments = db.relationship('Comment', backref='doctor', lazy='dynamic')
+    photo = db.relationship('PhotoModel', backref='doctor', uselist=False)
 
     def __repr__(self):
         return f'{self.family}'
 
     def __str__(self):
         return f'{self.family}'
+
+
+class PhotoModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64))
+    path = db.Column(db.Unicode(128))
+    type = db.Column(db.Unicode(3))
+    create_date = db.Column(db.DateTime, default=datetime.now)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=True)
+
+    def __repr__(self):
+        return f'{self.name}'
 
 
 class Appointment(db.Model):
@@ -242,6 +266,62 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
 
 
+class PhotoAdminModel(ModelView):
+    def _list_thumbnail(view, context, model, name):
+        if not model.path:
+            return ''
+
+        url = url_for('static', filename=os.path.join('storage/', model.path))
+
+        if model.type in ['jpg', 'jpeg', 'png', 'svg', 'gif']:
+            return Markup('<img src="%s" width="100">' % url)
+
+        if model.type in ['mp3']:
+            return Markup('<audio controls="controls"><source src="%s" type="audio/mpeg" /></audio>' % url)
+
+    column_formatters = {
+        'path': _list_thumbnail
+    }
+    form_extra_fields = {
+        'file': form.FileUploadField('file', base_path=app.config['STORAGE'])
+    }
+
+    def _change_path_data(self, _form):
+        try:
+            storage_file = _form.file.data
+
+            if storage_file is not None:
+                hash = random.getrandbits(128)
+                ext = storage_file.filename.split('.')[-1]
+                path = '%s.%s' % (hash, ext)
+
+                storage_file.save(
+                    os.path.join(app.config['STORAGE'], path)
+                )
+
+                _form.name.data = _form.name.data or storage_file.filename
+                _form.path.data = path
+                _form.type.data = ext
+
+                del _form.file
+
+        except Exception as ex:
+            pass
+
+        return _form
+
+    def edit_form(self, obj=None):
+        return self._change_path_data(
+            super(PhotoAdminModel, self).edit_form(obj)
+        )
+
+    def create_form(self, obj=None):
+        return self._change_path_data(
+            super(PhotoAdminModel, self).create_form(obj)
+        )
+
+
+
 ########## End Models #######
 
 
@@ -266,6 +346,7 @@ admin.add_view(ModelView(Comment, db.session))
 
 admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Role, db.session))
+admin.add_view(PhotoAdminModel(PhotoModel, db.session))
 
 
 from clinic_app import routers, auth

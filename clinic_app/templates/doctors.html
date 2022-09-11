@@ -4,6 +4,16 @@
 {{ super() }}
 
 {% block content %}
+
+<div class="max-w-6xl mx-auto py-2 px-6 xl:px-0">
+            <div class="products flex items-center flex-wrap">
+                {% for doctor in doctors %}
+                    {% include 'doctor/partials/doctor_list_item.html' %}
+                {% endfor %}
+            </div>
+</div>
+
+
 <div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
         <div class="text-slate-700 leading-snug">
             <h2 class="font-bold">Все специалисты</h2>

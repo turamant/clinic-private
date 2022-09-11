@@ -12,6 +12,8 @@ class BaseConfig:
 
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    STORAGE = '/home/tornado/PycharmProjects/pythonProject/Clinic/clinic_app/static/images'
+    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 class DevelopementConfig(BaseConfig):

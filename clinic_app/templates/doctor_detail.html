@@ -7,14 +7,19 @@
 <div class="mt-6 text-2xs text-slate-600 uppercase tracking-wider">
         <div class="text-slate-700 leading-snug">
                 <div class="information w-full py-6 px-6 lg:p-6">
+                    <div class="flex justify-start">
+                    <img class="mb-6 rounded"
+                        src="{{ photo }}"
+                            alt="Нет главной фотографии поста">
+                    </div>
                     <h1 class="font-bold text-2xl">{{ doctor.family }}</h1>
                             <p class="font-bold text-xl">{{ doctor.name }}</p>
                             <p class="font-bold text-xl">{{ doctor.patronymic }}</p>
-                            <p class="text-xl">Клиника: {{ doctor.clinic99 }}
-                            <p class="text-xl">Кабинет: {{ doctor.cabinet }}
-                            <p class="text-xl">Специальность: {{ doctor.specialty }}
-                            <p class="text-xl">Тариф: {{ doctor.admission_cost }}
-                            <p class="text-xl">Процент отчисления: {{ doctor.deduction_percentage }}
+                    <p class="text-xl">Клиника: {{ doctor.clinic99 }}</p>
+                    <p class="text-xl">Кабинет: {{ doctor.cabinet }}</p>
+                    <p class="text-xl">Специальность: {{ doctor.specialty }}</p>
+                            <p class="font-bold text-xl">Тариф: {{ doctor.admission_cost }} &#x20bd;</p>
+                    <p class="text-xl">Процент отчисления: {{ doctor.deduction_percentage }}</p>
              </div>
         </div>
     <button class="text-gray-900 bg-gradient-to-r from-lime-200 via-lime-400 to-lime-500 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-lime-300 dark:focus:ring-lime-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">

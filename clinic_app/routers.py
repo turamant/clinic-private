@@ -81,8 +81,13 @@ def doctor_detail(id):
     appointments = doctor.appointment
     print("DOCTOR_APP", appointments)
     comments = doctor.comments
+    if doctor.photo:
+        photo = url_for('static', filename='images/' + doctor.photo.path)
+    else:
+        photo = None
     return render_template('doctor_detail.html',
                            doctor=doctor,
+                           photo=photo,
                            appointments=appointments,
                            comments=comments)
 
