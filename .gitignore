@@ -4,3 +4,4 @@ password.txt
 __pycache__
 .idea/inspectionProfiles
 migrations
+clinic_app/static
