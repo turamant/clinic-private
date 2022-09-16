@@ -5,7 +5,6 @@ from datetime import datetime
 
 
 from flask_login import UserMixin, LoginManager
-from flask_wtf import CSRFProtect
 
 from markupsafe import Markup
 from sqlalchemy.ext.orderinglist import ordering_list
@@ -20,7 +19,6 @@ from config import DevelopementConfig
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__, template_folder="templates",  static_folder="static")
-csrf = CSRFProtect(app)
 app.config.from_object(DevelopementConfig)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -70,7 +68,7 @@ class Department(db.Model):
     __tablename__ = 'departments'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256), unique=True)
-    doctors = db.relationship('Doctor', backref='departments')
+    #doctors = db.relationship('Doctor', backref='departments')
 
     def __repr__(self):
         return f'<Speciality: {self.title}>'
@@ -209,12 +207,12 @@ class Doctor(db.Model):
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinics.id'))
     cabinet_id = db.Column(db.Integer, db.ForeignKey('cabinets.id'))
     specialty_id = db.Column(db.Integer, db.ForeignKey('specialties.id'))
-    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
-    category = db.Column(db.String(256), nullable=True)
-    stage = db.Column(db.Integer, nullable=True)
-    specialization = db.Column(db.String(1000), nullable=True)
-    education = db.Column(db.String(1000), nullable=True)
-    work_experience = db.Column(db.String(1000), nullable=True)
+    #department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
+    #category = db.Column(db.String(256), nullable=True)
+    #stage = db.Column(db.Integer, nullable=True)
+    #specialization = db.Column(db.String(1000), nullable=True)
+    #education = db.Column(db.String(1000), nullable=True)
+    #work_experience = db.Column(db.String(1000), nullable=True)
     admission_cost = db.Column(db.Numeric(10, 2))
     deduction_percentage = db.Column(db.Numeric(10, 2))
     comments = db.relationship('Comment', backref='doctor', lazy='dynamic')
@@ -255,8 +253,8 @@ class Appointment(db.Model):
 
     def __str__(self):
         if self.patient != None:
-            return f'Дата: {self.data} Время: {self.time}'
-        return f'Дата: {self.data} Время: {self.time} '
+            return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor}, Пациент: {self.patient}'
+        return f'Дата: {self.data} Время: {self.time} Доктор: {self.doctor} Пациент:'
 
 
 class Comment(db.Model):
@@ -374,12 +372,9 @@ admin.add_view(ModelView(Clinic, db.session))
 admin.add_view(ModelView(Cabinet, db.session))
 admin.add_view(ModelView(Comment, db.session))
 
-admin.add_view(ModelView(Department, db.session))
 admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Role, db.session))
 admin.add_view(PhotoAdminModel(PhotoModel, db.session))
-admin.add_view(ModelView(Signup, db.session))
 
 
 from clinic_app import routers, auth
-

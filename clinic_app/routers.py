@@ -2,12 +2,55 @@ from flask import render_template, url_for, request, flash, redirect
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
-from clinic_app import app, Appointment, Doctor, db, Patient, Specialty, Comment, Clinic
+from clinic_app import app, Appointment, Doctor, db, Patient, Specialty, Comment, Clinic, Department, Signup
 from clinic_app.forms import ClinicForm, DoctorForm, PatientForm, AppointmentForm, AppointmentFormWitOutDoctor
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    doctors = Doctor.query.all()
+    departments = Department.query.all()
+    if request.method == 'POST':
+        new_signup = Signup(
+            name=request.form.get('name'),
+            email=request.form.get('email'),
+            timestamp=request.form.get('timestamp'),
+            department=request.form.get('department'),
+            phone=request.form.get('phone'),
+            message=request.form.get('message'))
+        db.session.add(new_signup)
+        db.session.commit()
+    return render_template('site/index.html', doctors=doctors, departments=departments)
+
+
+@app.route('/about')
+def about():
+    doctors = Doctor.query.all()
+    departments = Department.query.all()
+    return render_template('site/about.html', doctors=doctors, departments=departments)
+
+
+@app.route('/blog')
+def blog():
+    departments = Department.query.all()
+    return render_template('site/blog.html', departments=departments)
+
+
+@app.route('/contact')
+def contact():
+    departments = Department.query.all()
+    return render_template('site/contact.html', departments=departments)
+
+
+@app.route('/doctors')
+def doctors():
+    doctors = Doctor.query.all()
+    departments = Department.query.all()
+    return render_template('site/doctors.html', doctors=doctors, departments=departments)
+
+
+@app.route('/')
+def index2():
     """
     Все приемы, все специальности, количество пациентов по докторам
     params:
@@ -85,7 +128,7 @@ def doctor_detail(id):
         photo = url_for('static', filename='images/' + doctor.photo.path)
     else:
         photo = None
-    return render_template('doctor_detail.html',
+    return render_template('site/doctor_detail.html',
                            doctor=doctor,
                            photo=photo,
                            appointments=appointments,
@@ -452,7 +495,7 @@ def add_doctor_appointment(id):
     for field_errors in form.errors.values():
         for error in field_errors:
             flash(error, 'error')
-    return render_template('new_doctor_appointment.html', form=form)
+    return render_template('site/new_doctor_appointment.html', form=form)
 
 
 
@@ -506,5 +549,8 @@ def del_appointment(id):
         db.session.commit()
         return redirect(url_for('index_appointments'))
     return render_template('delete_appointment.html', appointment=appointment)
+
+
+
 
 

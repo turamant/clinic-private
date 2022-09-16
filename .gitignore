@@ -5,3 +5,4 @@ __pycache__
 .idea/inspectionProfiles
 migrations
 clinic_app/static
+clinic_app/templates
