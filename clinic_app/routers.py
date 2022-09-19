@@ -11,7 +11,7 @@ from clinic_app.forms import ClinicForm, DoctorForm, PatientForm, AppointmentFor
 @app.before_first_request
 def create_user():
     db.create_all()
-    user_datastore.create_user(email='askvart_admin@yahoo.com', password='password')
+    user_datastore.create_user(email='xxxxxxxx@xxxxxxxxx.com', password='password')
     db.session.commit()
 
 '''
