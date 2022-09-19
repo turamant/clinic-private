@@ -3,16 +3,16 @@ import os
 import random
 from datetime import datetime
 
-
-from flask_login import UserMixin, LoginManager
+from flask_login import current_user
+from flask_security import RoleMixin, UserMixin, SQLAlchemyUserDatastore, Security
 from flask_wtf import CSRFProtect
 
 from markupsafe import Markup
-from sqlalchemy.ext.orderinglist import ordering_list
+
 
 from .auth import auth
-from flask import Flask, url_for
-from flask_admin import Admin, form
+from flask import Flask, url_for, redirect, request
+from flask_admin import Admin, form, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_migrate import Migrate
 
@@ -25,18 +25,56 @@ app.config.from_object(DevelopementConfig)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-login_manager = LoginManager()
-login_manager.session_protection = 'strong'
-login_manager.login_view = 'auth.login'
 
-login_manager.init_app(app)
+roles_users = db.Table('roles_users',
+        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+        db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
 
+class Role(db.Model, RoleMixin):
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True)
+    password = db.Column(db.String(255))
+    active = db.Column(db.Boolean())
+    confirmed_at = db.Column(db.DateTime())
+    roles = db.relationship('Role', secondary=roles_users,
+                            backref=db.backref('users', lazy='dynamic'))
+
+
+# Setup Flask-Security
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
+
+
+'''
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
+'''
 #######3   Models ###########
+
+class City(db.Model):
+    __tablename__ = 'cities'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256))
+    post_index = db.Column(db.String(6), unique=True)
+    latitude = db.Column(db.Numeric(11, 7))
+    longitude = db.Column(db.Numeric(11, 7))
+    patients = db.relationship('Patient', backref='city', lazy='dynamic')
+    clinics = db.relationship('Clinic', backref='city', lazy='dynamic')
+
+
+    def __repr__(self):
+        return f'<City: {self.name}>'
+
+    def __str__(self):
+        return f'{self.name}'
 
 
 class Signup(db.Model):
@@ -110,24 +148,6 @@ class Cabinet(db.Model):
 
     def __str__(self):
         return f'{self.number}'
-
-
-class City(db.Model):
-    __tablename__ = 'cities'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256))
-    post_index = db.Column(db.String(6), unique=True)
-    latitude = db.Column(db.Numeric(11, 7))
-    longitude = db.Column(db.Numeric(11, 7))
-    patients = db.relationship('Patient', backref='city', lazy='dynamic')
-    clinics = db.relationship('Clinic', backref='city', lazy='dynamic')
-
-
-    def __repr__(self):
-        return f'<City: {self.name}>'
-
-    def __str__(self):
-        return f'{self.name}'
 
 
 class Street(db.Model):
@@ -279,21 +299,6 @@ class Comment(db.Model):
         return f'Автор {self.name}: {self.body},{self.created}'
 
 
-class Role(db.Model):
-    __tablename__ = 'roles'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True)
-    description = db.Column(db.String(255))
-
-
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, index=True)
-    username = db.Column(db.String(100), unique=True, index=True)
-    password_hash = db.Column(db.String(255))
-    image = db.Column(db.String(20), nullable=True, default='default.jpg')
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
 
 
 class PhotoAdminModel(ModelView):
@@ -351,6 +356,16 @@ class PhotoAdminModel(ModelView):
         )
 
 
+class AdminMixin:
+    def is_accessible(self):
+        return current_user.has_role('admin')
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('security.login', next=request.url))
+
+
+class HomeAdminView(AdminMixin, AdminIndexView):
+    pass
 
 ########## End Models #######
 
@@ -358,7 +373,7 @@ class PhotoAdminModel(ModelView):
 app.register_blueprint(auth, url_prefix='/auth')
 
 ### Admin panel ###
-admin = Admin(app, 'Clinic', url='/admin')
+admin = Admin(app, 'Democlinic', url='/', index_view=HomeAdminView())
 
 admin.add_view(ModelView(Specialty, db.session))
 admin.add_view(ModelView(Patient, db.session))

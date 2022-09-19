@@ -7,3 +7,4 @@ migrations
 clinic_app/static
 clinic_app/templates
 clinic_app/old_init_.py
+clinic_app/ssl

@@ -2,8 +2,40 @@ from flask import render_template, url_for, request, flash, redirect
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
-from clinic_app import app, Appointment, Doctor, db, Patient, Specialty, Comment, Clinic, Department, Signup
+from clinic_app import app, Appointment, Doctor, db, Patient, Specialty, Comment, Clinic, Department, Signup, \
+    user_datastore
 from clinic_app.forms import ClinicForm, DoctorForm, PatientForm, AppointmentForm, AppointmentFormWitOutDoctor
+
+'''
+# Create a user to test with
+@app.before_first_request
+def create_user():
+    db.create_all()
+    user_datastore.create_user(email='askvart_admin@yahoo.com', password='password')
+    db.session.commit()
+
+'''
+
+
+@app.route('/profile/')
+@login_required
+def profile():
+    # image_file = url_for('static', filename='images/' + current_user.image)
+    # username = current_user.username
+    return render_template('profile.html')
+
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    if request.method == 'POST':
+        user_datastore.create_user(
+            email=request.form.get('email'),
+            password=request.form.get('password')
+        )
+        db.session.commit()
+        return redirect(url_for('profile'))
+    return render_template('site/register.html')
+
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -34,6 +66,7 @@ def about():
 def blog():
     departments = Department.query.all()
     return render_template('site/blog.html', departments=departments)
+
 
 
 @app.route('/contact')
@@ -224,11 +257,6 @@ def internal_server_error(e):
     return render_template('500.html'), 500
 
 
-@app.route('/profile/')
-@login_required
-def profile():
-    image_file = url_for('static', filename='images/' + current_user.image)
-    return render_template('profile.html', username=current_user.username, image_file=image_file)
 
 ################   Черновики ###################
 
